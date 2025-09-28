@@ -4,11 +4,11 @@
 # Import libraries
 ###########################
 from typing import List
+from argparse import ArgumentParser
 
 ###########################
 #   Global variables
 ###########################
-isDebug = False
 
 #   Define golbal variables
 Suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
@@ -20,6 +20,9 @@ Ranks = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', '
 
 class Card:
 	def __init__( self, suit: str, rank: str):
+		''' Initialize card with suit ( Heart, Diamond, Club, Spade ) 
+			and rank (Ace, 2, 3, ...)
+		'''
 		self.suit = suit
 		self.rank = rank
 
@@ -94,16 +97,24 @@ class Deck:
 #   Helper function
 ############################
 
-def compare_cards( player_cards: List[Card], dealer_cards: List[Card], isDebug: bool = False) -> int:
+def compare_cards( player_cards: List[Card], 
+					dealer_cards: List[Card],
+					isDebug: bool = False ) -> int:
 	''' Compare cards value of player and dealer
 		Args:
 			- player_cards: list of player's cards
 			- dealer_cards: list of dealer's cards
 		Returns:
-			- 1 if player wins
-			- 0 if tie
-			- -1 if player loses
+			- 1 if player wins (player's card value > dealer's)
+			- -1 if player loses (player's card value < dealers)
+			- 0 if tie (player's card value == dealer)
 	'''
+
+	for card in player_cards:
+		assert isinstance( card, Card )
+	for card in dealer_cards:
+		assert isinstance( card, Card )
+
 	#	Calculate cards value
 	player_value = sum([card.value for card in player_cards])
 	dealer_value = sum([card.value for card in dealer_cards])
@@ -125,52 +136,64 @@ def compare_cards( player_cards: List[Card], dealer_cards: List[Card], isDebug: 
 
 def main():
 
-	#	Initialize total chips
+	#	Parse arguments
+	parser = ArgumentParser(prog='Pok-Deng game')
+	parser.add_argument('--debug', action='store_true', default=False, 
+					 help='Print debug message')
+	args = parser.parse_args()
+	isDebug = args.debug
+
+	#	Initialize total chips and game index
 	#	Assume that initial chip at the start of game = 0
 	total_net_chips = 0
 	game_idx = 1
 
-	#	Initialize deck
+	#	Initialize deck of cards
 	deck = Deck()
 
 	#   Game loop forever until user stops
 	while True:
-
 
 		#   Start game
 		while True:
 			print('='*20)
 			print(f'Game {game_idx}:')
 			print('Please put your bet')
+
+			#	Get user chips input and validate input
 			try:
 				bet_chips = int(input('> '))
 			except ValueError:
 				print('Invalid input. Please enter an integer.')
 			else:
-				break
+				#	Validate if chips is a positive number
+				if bet_chips <= 0:
+					print('Invalid input. Please enter a positive integer.')
+				else:
+					break
 		
 		#	Reset deck and shuffle
 		deck.reset()
 		deck.shuffle()
 		
-		#	Deal 2 cards for player and dealer
+		#	Deal 2 cards each for player and dealer
 		player_cards = deck.draw( 2 )
 		dealer_cards = deck.draw( 2 )
 
-		#	Print result
-		print( f'You got {player_cards[0]}, {player_cards[1]}' )
-		print( f'The dealer got {dealer_cards[0]}, {dealer_cards[1]}' )
+		#	Display dealing result
+		print( f'> You got {player_cards[0]}, {player_cards[1]}' )
+		print( f'> The dealer got {dealer_cards[0]}, {dealer_cards[1]}' )
 
 		#	Compare cards and get result
 		result = compare_cards( player_cards, dealer_cards, isDebug=isDebug )
 		
 		#	Display card result
 		if result == 1:
-			print( f'You won!!!, received {bet_chips} chips' )
+			print( f'> You won!!!, received {bet_chips} chips' )
 		elif result == -1:
-			print( f'You lost!!!, forfeited {bet_chips} chips' )
+			print( f'> You lost!!!, forfeited {bet_chips} chips' )
 		else:
-			print( f'It\'s a tie!!! You neither win nor lose chips.' )
+			print( f'> It\'s a tie!!! You neither win nor lose chips.' )
 
 		#	Add result of game to net chips
 		total_net_chips += result * bet_chips
@@ -181,9 +204,10 @@ def main():
 		#	Ask if user wants to continue playing
 		while True:
 			
-			print('Wanna play more (Yes/No)?')
+			print('> Wanna play more (Yes/No)?')
 			user_input = input('> ').lower()
-
+			
+			#	Only accept yes/no (case-insensitive)
 			if user_input not in ['yes','no']:
 				print('Invalid input. Please answer \'Yes\' or \'No\'')
 			else:
@@ -197,7 +221,8 @@ def main():
 		game_idx += 1
 
 	#	Display total chips
-	print( f'You got total {total_net_chips} chips' )
+	print( '='*20 )
+	print( f'> You got total {total_net_chips} chips' )
 
 if __name__ == '__main__':
 	main()
