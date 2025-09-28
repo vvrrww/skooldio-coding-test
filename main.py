@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 #   Global variables
 ###########################
 
-#   Define golbal variables
+#   Define global variables
 Suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
 Ranks = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
 
@@ -135,6 +135,8 @@ def compare_cards( player_cards: List[Card],
 ############################
 
 def main():
+	''' This functions run Pok-deng game
+	'''
 
 	#	Parse arguments
 	parser = ArgumentParser(prog='Pok-Deng game')
